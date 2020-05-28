@@ -21,10 +21,15 @@ module.exports = (app, serviceList,jwt) => {
 
     app.get("/list/:id",jwt.validateJWT, async (req, res) => {
         try{
-            if(await serviceList.dao.getByIdList(req.params.id,req.user) === undefined){
+            const list = await serviceList.dao.getByIdList(req.params.id);
+            if (list === undefined){
+                return res.status(404).end();
+            }
+
+            if(await serviceList.dao.getByIdList(req.params.id) === undefined){
                 res.status(404).end()
             } else{
-                res.json(await serviceList.dao.getByIdList(req.params.id,req.user))
+                res.json(await serviceList.dao.getByIdList(req.params.id))
             }
         } catch(err){
             console.log(err);
@@ -47,10 +52,18 @@ module.exports = (app, serviceList,jwt) => {
     });
 
     app.delete("/list/:id",jwt.validateJWT, async (req, res) => {
-        const list = await serviceList.dao.getByIdList(req.params.id,req.user)
+        const list = await serviceList.dao.getByIdList(req.params.id)
         if (list === undefined) {
             return res.status(404).end()
         }
+
+        console.log(list.useraccount_id)
+        console.log(req.user.id)
+
+        if (list.useraccount_id !== req.user.id) {
+            return res.status(403).end()
+        }
+
         serviceList.dao.delete(req.params.id)
             .then(res.status(200).end())
             .catch(e => {
@@ -64,7 +77,11 @@ module.exports = (app, serviceList,jwt) => {
         if ((list.id === undefined) || (list.id == null) || (!serviceList.isValid(list))) {
             return res.status(400).end()
         }
-        if (await serviceList.dao.getByIdList(list.id,req.user) === undefined) {
+
+        if (list.useraccount_id !== req.user.id) {
+            return res.status(403).end()
+        }
+        if (await serviceList.dao.getByIdList(list.id) === undefined) {
             return res.status(404).end()
         }
         serviceList.dao.updateList(list)

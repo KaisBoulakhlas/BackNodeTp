@@ -10,16 +10,16 @@ module.exports = class ListDAO extends BaseDAO {
             [list.shop, list.date, list.archived, list.useraccount_id])
     }
 
-    getByIdList(id, user) {
+    getByIdList(id) {
         return new Promise((resolve, reject) =>
-            this.db.query(`SELECT * FROM list WHERE id=$1 AND useraccount_id=$2`, [id,user.id])
+            this.db.query(`SELECT * FROM list WHERE id=$1`, [id])
                 .then(res => resolve(res.rows[0]))
                 .catch(e => reject(e)))
     }
 
     getAllLists(user) {
         return new Promise((resolve, reject) =>
-            this.db.query("SELECT * FROM list WHERE archived=false AND useraccount_id=$1  ORDER BY id",[user.id])
+            this.db.query("SELECT * FROM list WHERE archived=false AND useraccount_id=$1 ORDER BY id",[user.id])
                 .then(res => resolve(res.rows))
                 .catch(e => reject(e)))
     }
