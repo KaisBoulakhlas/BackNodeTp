@@ -8,6 +8,7 @@ const morgan = require('morgan');
 const UserAccountService = require("./services/useraccount");
 const ListService = require("./services/list");
 const ItemService = require("./services/item");
+const PartageService = require("./services/partage");
 //http://127.0.0.1:56188/browser/
 const app = express()
 app.use(bodyParser.urlencoded({ extended: false })); // URLEncoded form data
@@ -22,11 +23,13 @@ const db = new pg.Pool({ connectionString: connectionString });
 const userAccountService = new UserAccountService(db);
 const listService = new ListService(db);
 const itemService = new ItemService(db);
+const partageService = new PartageService(db);
 const jwt = require('./jwt')(userAccountService);
 require('./api/useraccountAPI')(app, userAccountService, jwt);
 require('./api/listAPI')(app, listService, jwt);
 require('./api/itemAPI')(app, itemService, jwt);
-require('./datamodel/seeder')(userAccountService,listService, itemService)
+require('./api/partageAPI')(app, partageService,listService,userAccountService, jwt);
+require('./datamodel/seeder')(userAccountService,listService, itemService,partageService)
 .then(app.listen(3333));
 
 

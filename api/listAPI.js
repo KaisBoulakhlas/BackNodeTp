@@ -19,6 +19,25 @@ module.exports = (app, serviceList,jwt) => {
         }
     });
 
+    app.get("/listShare/:id", jwt.validateJWT, async (req, res) => {
+        try {
+                const list = await serviceList.dao.getShareById(req.params.id, req.user.id);
+                console.log(list)
+                if (!(!!list)) {
+                    return res.status(404).end();
+                }
+                if (list.user_id !== req.user.id) {
+                    return res.status(403).end();
+                }
+                return res.json(list);
+        }
+        catch (e) {
+            console.log(e);
+            res.status(400).end();
+        };
+    });
+
+
     app.get("/list/:id",jwt.validateJWT, async (req, res) => {
         try{
             const list = await serviceList.dao.getByIdList(req.params.id);
